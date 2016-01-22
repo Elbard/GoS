@@ -63,7 +63,8 @@ function autoQualityCircles:getGoodQuality(range)
   end
 end
 
-function myDrawCircle(x, y , z, radius, width, quality, colorARGB) -- If someone can teach me, how to make this class function, I will appreciate *)
+ -- If someone can teach me, how to make this class function, I will appreciate *)
+function myDrawCircle(x, y , z, radius, width, quality, colorARGB)
   if not quality then
     origin, radius, width, quality, colorARGB = x, y , z, radius, width
     if  radius > 1400 then
