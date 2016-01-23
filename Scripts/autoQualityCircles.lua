@@ -1,4 +1,4 @@
--- autoQualityCircles v1.2 | by Elbard
+-- autoQualityCircles v1.21 | by Elbard
 
 require "Inspired" -- MenuConfig / DrawCircle3D / Updater
 class "autoQualityCircles"
@@ -7,7 +7,7 @@ function autoQualityCircles:__init()
   self.scriptName = "autoQualityCircles"
   self.gitVersionPath = "/Elbard/GoS/master/Scripts/"..self.scriptName..".version"
   self.gitScriptPath = "/Elbard/GoS/master/Scripts/"..self.scriptName..".lua"
-  self.localVersion = 1.2
+  self.localVersion = 1.21
   self.cfg = MenuConfig("Auto Quality Circles", "autoQualityCircles")
   self.myHeroPos = GetOrigin(myHero)
   self.savedMessages = {}
@@ -32,7 +32,7 @@ function autoQualityCircles:__init()
   self.cfg.testC:Slider("circleWidth", "Width", 2, 1, 20)
   OnTick(function() self:Tick() end)
   OnDraw(function() self:Draw() end)
-  if self.cfg.checkUpdates:Value() then
+  if self.cfg.checkUpdates:Value() and AutoUpdater then
     AutoUpdater(self.localVersion, true, "raw.githubusercontent.com", self.gitVersionPath, self.gitScriptPath, self.scriptName..".lua", 
       function() self:update() end, function() self:noUpdate() end, function() self:newVersion() end, function() self:updateError() end)
   end
