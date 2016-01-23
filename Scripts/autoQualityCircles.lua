@@ -140,8 +140,9 @@ function autoQualityCircles:Draw()
     DrawCircle(self.myHeroPos, self.cfg.testC.circleRange:Value(), self.cfg.testC.circleWidth:Value(), self:calculateDefaultQuality(), 
         self.cfg.testC.circleCol:Value()); -- (params: x, y , z, radius, width, quality, colorARGB)
 
-      -- DrawCircle3D(self.myHeroPos.x, self.myHeroPos.y, self.myHeroPos.z, self.cfg.testC.circleRange:Value(), self.cfg.testC.circleWidth:Value(), 
-      --   self.cfg.testC.circleCol:Value(), self:calculateInspiredQuality()) -- (params: x, y, z, radius, width, color, quality)
+    -- DrawCircle3D(self.myHeroPos.x, self.myHeroPos.y, self.myHeroPos.z, self.cfg.testC.circleRange:Value(),
+    --   self.cfg.testC.circleWidth:Value(), self.cfg.testC.circleCol:Value(), 
+    --     self:calculateInspiredQuality()) -- (params: x, y, z, radius, width, color, quality)
   end
 end
 
