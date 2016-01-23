@@ -1,6 +1,6 @@
 -- autoQualityCircles v1.21 | by Elbard
 
-require "Inspired" -- MenuConfig / DrawCircle3D / Updater
+require "Inspired" -- MenuConfig / DrawCircle3D / AutoUpdater
 class "autoQualityCircles"
 
 function autoQualityCircles:__init()
