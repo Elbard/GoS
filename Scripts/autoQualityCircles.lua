@@ -1,129 +1,147 @@
--- autoQualityCircles v1.1 | by Elbard
+-- autoQualityCircles v1.2 | by Elbard
 
-require "Inspired"
+require "Inspired" -- MenuConfig / DrawCircle3D / Updater
 class "autoQualityCircles"
 
 function autoQualityCircles:__init()
+  self.scriptName = "autoQualityCircles"
+  self.gitVersionPath = "/Elbard/GoS/master/Scripts/"..self.scriptName..".version"
+  self.gitScriptPath = "/Elbard/GoS/master/Scripts/"..self.scriptName..".lua"
+  self.localVersion = 1.2
   self.cfg = MenuConfig("Auto Quality Circles", "autoQualityCircles")
-  self.myHeroPos = GetOrigin(myHero) -- myHero position
+  self.myHeroPos = GetOrigin(myHero)
   self.savedMessages = {}
   self.second = 1000
   self.gTimeDelay = 0
   self.dTimeDelay = 0
   self.circleAssigned = false
   _G.oldDrawCircle = rawget(_G, 'DrawCircle')
+  _G.oldDrawCircle3D = DrawCircle3D
 
-  self.cfg:Boolean("debug", "Show Debug Info", false)
-  self.cfg:Boolean("qual", "Adjust global circle quality", true)
-  self.cfg:Slider("gQual", "Global quality multiplier", 1, 1, 10)
-  self.cfg:Menu("range", "Test Circle")
-  self.cfg.range:Boolean("drawRange", "Draw", false)
-  self.cfg.range:Slider("circleRange", "Range", 500, 1, 1400)
-  self.cfg.range:ColorPick("circleCol", "Color", {255, 0, 204, 102})
-  self.cfg.range:Slider("circleQual", "Test multiplier x1", 1, 0, 10)
-  self.cfg.range:Slider("qualMultiTen", "Test multiplier x10", 1, 1, 10)
-  self.cfg.range:Slider("qualMultiHun", "Test multiplier x100", 1, 1, 10)
-  self.cfg.range:Slider("circleWidth", "Width", 2, 1, 20)
+  self.cfg:Boolean("debug", "Show debug info (dev)", false)
+  self.cfg:Boolean("checkUpdates", "Check Updates on Load", true)
+  self.cfg:Boolean("adjust", "Adjust global circle quality", true)
+  self.cfg:Slider("gQual", "Global quality multiplier", 5, 1, 10)
+  self.cfg:Menu("testC", "Test Circle (dev)")
+  self.cfg.testC:Boolean("drawRange", "Draw", false)
+  self.cfg.testC:Slider("circleRange", "Range", 1, 1, 3000)
+  self.cfg.testC:ColorPick("circleCol", "Color", {255, 0, 204, 102})
+  self.cfg.testC:Slider("circleQual", "Local quality multiplier x1", 1, 0, 10)
+  self.cfg.testC:Slider("qualMultiTen", "Local quality multiplier x10", 1, 1, 10)
+  self.cfg.testC:Slider("qualMultiHun", "Local quality multiplier x100", 1, 1, 10)
+  self.cfg.testC:Slider("circleWidth", "Width", 2, 1, 20)
   OnTick(function() self:Tick() end)
   OnDraw(function() self:Draw() end)
-  self:Msg("Loaded!", "autoQualityCircles")
+  if self.cfg.checkUpdates:Value() then
+    AutoUpdater(self.localVersion, true, "raw.githubusercontent.com", self.gitVersionPath, self.gitScriptPath, self.scriptName..".lua", 
+      function() self:update() end, function() self:noUpdate() end, function() self:newVersion() end, function() self:updateError() end)
+  end
+  self:msg("Loaded!", "autoQualityCircles")
 end
 
-function autoQualityCircles:getGoodQuality(range)
-  local multi = 1 + ((self.cfg.gQual:Value() - 1) / 10)
-  self:printLimitedDebugMsg("multi value = "..tostring(multi))
-  if range < 11 then
-    return 100 / multi
-  elseif range > 10 and range < 21 then
-    return 14 / multi
-  elseif range > 20 and range < 31 then
-    return 16 / multi
-  elseif range > 30 and range < 41 then
-    return 20 / multi
-  elseif range > 40 and range < 51 then
-    return 25 / multi
-  elseif range > 50 and range < 71 then
-    return 33 / multi
-  elseif range > 70 and range < 91 then
-    return 50 / multi
-  elseif range > 90 and range < 141 then
-    return 62 / multi
-  elseif range > 140 and range < 241 then
-    return 83 / multi
-  elseif range > 240 and range < 301 then
-    return 100 / multi
-  elseif range > 300 and range < 401 then
-    return 125 / multi
-  elseif range > 400 and range < 601 then
-    return 142 / multi
-  elseif range > 600 and range < 901 then
-    return 166 / multi
-  elseif range > 900 and range < 1401 then
-    return 200 / multi
-  end
+function autoQualityCircles:update()
+  self:msg("Successfully updated! Please reload.", "autoQualityCircles", "49C14F")
+end
+
+function autoQualityCircles:noUpdate()
+  self:msg("Update is not required.", "autoQualityCircles", "709BE0")
+end
+
+function autoQualityCircles:newVersion()
+  self:msg("New version found! Updating...", "autoQualityCircles", "E2C416")
+end
+
+function autoQualityCircles:updateError()
+  self:msg("Error: Script was not updated!", "autoQualityCircles", "E54242")
 end
 
  -- If someone can teach me, how to make this class function, I will appreciate *)
 function myDrawCircle(x, y , z, radius, width, quality, colorARGB)
-  if not quality then
+  if not colorARGB then
     origin, radius, width, quality, colorARGB = x, y , z, radius, width
-    if  radius > 1400 then
-      oldDrawCircle(origin, 1400, width, AQC_Instance:getGoodQuality(1400), colorARGB)
-      AQC_Instance:printLimitedDebugMsg(" !! warning !! circle radius limited to 1400") -- else bad things will happen
-    else
-      oldDrawCircle(origin, radius, width, AQC_Instance:getGoodQuality(radius), colorARGB)
-    end
+    if width == 0 then width = 1 end
+    myDrawCircle3D(origin.x, origin.y , origin.z, radius, width, colorARGB, 0)
   else
-    if radius > 1400 then
-      oldDrawCircle(x, y , z, 1400, width, AQC_Instance:getGoodQuality(1400), colorARGB)
-      AQC_Instance:printLimitedDebugMsg(" !! warning !! circle radius limited to 1400") -- else bad things will happen
-    else
-      oldDrawCircle(x, y , z, radius, width, AQC_Instance:getGoodQuality(radius), colorARGB)
-    end
+    if width == 0 then width = 1 end
+    myDrawCircle3D(x, y , z, radius, width, colorARGB, 0)
   end
+end
+
+ -- created by Inspired | edited by Elbard
+function myDrawCircle3D(x, y, z, radius, width, color, quality)
+  local multi = 1 + ((AQC_Instance.cfg.gQual:Value() / 10) - 0.5)
+  local points = {}
+  local numOfEdges = 0
+
+  radius = radius or 300
+  numOfEdges = (math.ceil(math.pow(radius,1/(2.1/multi)))+2) -- the formula 8-)
+  quality = 2 * math.pi / numOfEdges
+  AQC_Instance:printLimitedDebugMsg("number of edges = "..numOfEdges)
+  
+  for theta = 0, 2 * math.pi + quality, quality do
+    local c = WorldToScreen(1,Vector(x + radius * math.cos(theta), y, z - radius * math.sin(theta)))
+    points[#points + 1] = Vector(c.x, c.y)
+  end
+  DrawLines2(points, width or 1, color or 4294967295)
 end
 
 function autoQualityCircles:Tick()
   if GetTickCount() > self.gTimeDelay then -- loop (2)
-    if self.cfg.qual:Value() then
+    if self.cfg.adjust:Value() then
       if not self.circleAssigned then
         _G.DrawCircle = myDrawCircle
-        self.circleAssigned = true
+        _G.DrawCircle3D = myDrawCircle3D
         self:printDebugMsg("circle SET")
+        self.circleAssigned = true
       end
     else
       if self.circleAssigned then
         _G.DrawCircle = _G.oldDrawCircle
+        DrawCircle3D = _G.oldDrawCircle3D
         self:printDebugMsg("circle BACK")
         self.circleAssigned = false
       end
     end
-    self:printDebugMsg("in g loop")
     self.gTimeDelay = GetTickCount() + 1 * self.second
   end
-  self:printLimitedDebugMsg("test")
-  if self.cfg.range.drawRange:Value() then
+  if self.cfg.testC.drawRange:Value() then
     self.myHeroPos = GetOrigin(myHero)
   end
 end
 
-function autoQualityCircles:calculateQuality()
-  local qual = 1000/(self.cfg.range.circleQual:Value()*self.cfg.range.qualMultiTen:Value()*self.cfg.range.qualMultiHun:Value())
-  self:printLimitedDebugMsg("quality = "..qual)
-  return qual
+function autoQualityCircles:calculateDefaultQuality()
+  local quality = 1000/(self.cfg.testC.circleQual:Value()*self.cfg.testC.qualMultiTen:Value()*self.cfg.testC.qualMultiHun:Value())
+  if not self.cfg.adjust:Value() then self:printLimitedDebugMsg("local gos quality = "..quality) end
+  return quality
+end
+
+function autoQualityCircles:calculateInspiredQuality()
+  local quality = (self.cfg.testC.circleQual:Value()*self.cfg.testC.qualMultiTen:Value()*self.cfg.testC.qualMultiHun:Value())
+  if not self.cfg.adjust:Value() then self:printLimitedDebugMsg("local inspired quality = "..quality) end
+  return quality
 end
 
 function autoQualityCircles:Draw()
-  if self.cfg.range.drawRange:Value() then
-    self:printLimitedDebugMsg("myHeroPos{x="..math.floor(self.myHeroPos.x)..", y="..math.floor(self.myHeroPos.y)..
-      ", z="..math.floor(self.myHeroPos.z).."}")
-    self:printLimitedDebugMsg("range="..self.cfg.range.circleRange:Value()..
-      ", width="..self.cfg.range.circleWidth:Value()..", col{A="..self.cfg.range.circleCol.color[1]:Value()..
-        ", R="..self.cfg.range.circleCol.color[2]:Value()..", G="..self.cfg.range.circleCol.color[3]:Value()..
-          ",B="..self.cfg.range.circleCol.color[4]:Value().."}")
-    DrawCircle(self.myHeroPos, self.cfg.range.circleRange:Value(), self.cfg.range.circleWidth:Value(), self:calculateQuality(), 
-        self.cfg.range.circleCol:Value());
-          -- (params: x, y , z, radius, width, quality, colorARGB)
+  if self.cfg.testC.drawRange:Value() then
+    -- DrawCircle(self.myHeroPos,30,0,0,ARGB(0xff,0,0xff,0)); -- GREEN
+    -- DrawCircle(self.myHeroPos,100,0,0,0xffffffff); -- WHITE
+    -- DrawCircle(self.myHeroPos.x,self.myHeroPos.y,self.myHeroPos.z,200,0,0,0xffff0000); -- RED
+    -- DrawCircle(self.myHeroPos.x,self.myHeroPos.y,self.myHeroPos.z,450,0,0,ARGB(0xff,0,0,0xff)); -- BLUE
+    -- DrawCircle(self.myHeroPos.x,self.myHeroPos.y,self.myHeroPos.z,900,2,400,0xffff5500); -- ORANGE
+    
+    -- self:printLimitedDebugMsg("myHeroPos{x="..math.floor(self.myHeroPos.x)..", y="..math.floor(self.myHeroPos.y)..
+    --   ", z="..math.floor(self.myHeroPos.z).."}") -- hero pos
+
+    -- self:printLimitedDebugMsg("range="..self.cfg.testC.circleRange:Value()..
+    --   ", width="..self.cfg.testC.circleWidth:Value()..", col{A="..self.cfg.testC.circleCol.color[1]:Value()..
+    --     ", R="..self.cfg.testC.circleCol.color[2]:Value()..", G="..self.cfg.testC.circleCol.color[3]:Value()..
+    --       ",B="..self.cfg.testC.circleCol.color[4]:Value().."}") -- random debug info
+
+    DrawCircle(self.myHeroPos, self.cfg.testC.circleRange:Value(), self.cfg.testC.circleWidth:Value(), self:calculateDefaultQuality(), 
+        self.cfg.testC.circleCol:Value()); -- (params: x, y , z, radius, width, quality, colorARGB)
+
+      -- DrawCircle3D(self.myHeroPos.x, self.myHeroPos.y, self.myHeroPos.z, self.cfg.testC.circleRange:Value(), self.cfg.testC.circleWidth:Value(), 
+      --   self.cfg.testC.circleCol:Value(), self:calculateInspiredQuality()) -- (params: x, y, z, radius, width, color, quality)
   end
 end
 
@@ -148,8 +166,9 @@ function autoQualityCircles:color(msg, hexColorCode) -- color text
   return "<font color=\"#"..hexColorCode.."\">"..msg.."</font>"
 end
 
-function autoQualityCircles:Msg(msg, script)
-  PrintChat("<font color=\"#00FFFF\">["..script.."]:</font> <font color=\"#FFFFFF\">"..msg.."</font>")
+function autoQualityCircles:msg(msg, script, color)
+  color = color or "FFFFFF"
+  PrintChat("<font color=\"#00FFFF\">["..script.."]:</font> "..self:color(msg, color))
 end
 
 _G.AQC_Instance = autoQualityCircles() -- init
