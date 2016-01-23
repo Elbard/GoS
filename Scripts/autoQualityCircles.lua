@@ -1,14 +1,14 @@
--- autoQualityCircles v1.21 | by Elbard
+-- AutoQualityCircles v1.22 | by Elbard
 
 require "Inspired" -- MenuConfig / DrawCircle3D / AutoUpdater
-class "autoQualityCircles"
+class "AutoQualityCircles"
 
-function autoQualityCircles:__init()
-  self.scriptName = "autoQualityCircles"
+function AutoQualityCircles:__init()
+  self.scriptName = "AutoQualityCircles"
   self.gitVersionPath = "/Elbard/GoS/master/Scripts/"..self.scriptName..".version"
   self.gitScriptPath = "/Elbard/GoS/master/Scripts/"..self.scriptName..".lua"
-  self.localVersion = 1.21
-  self.cfg = MenuConfig("Auto Quality Circles", "autoQualityCircles")
+  self.localVersion = 1.22
+  self.cfg = MenuConfig("AutoQualityCircles", "AutoQualityCircles")
   self.myHeroPos = GetOrigin(myHero)
   self.savedMessages = {}
   self.second = 1000
@@ -36,23 +36,23 @@ function autoQualityCircles:__init()
     AutoUpdater(self.localVersion, true, "raw.githubusercontent.com", self.gitVersionPath, self.gitScriptPath, self.scriptName..".lua", 
       function() self:update() end, function() self:noUpdate() end, function() self:newVersion() end, function() self:updateError() end)
   end
-  self:msg("Loaded!", "autoQualityCircles")
+  self:msg("Loaded!", "AutoQualityCircles")
 end
 
-function autoQualityCircles:update()
-  self:msg("Successfully updated! Please reload.", "autoQualityCircles", "49C14F")
+function AutoQualityCircles:update()
+  self:msg("Successfully updated! Please reload.", "AutoQualityCircles", "49C14F")
 end
 
-function autoQualityCircles:noUpdate()
-  self:msg("Update is not required.", "autoQualityCircles", "709BE0")
+function AutoQualityCircles:noUpdate()
+  self:msg("Update is not required.", "AutoQualityCircles", "709BE0")
 end
 
-function autoQualityCircles:newVersion()
-  self:msg("New version found! Updating...", "autoQualityCircles", "E2C416")
+function AutoQualityCircles:newVersion()
+  self:msg("New version found! Updating...", "AutoQualityCircles", "E2C416")
 end
 
-function autoQualityCircles:updateError()
-  self:msg("Error: Script was not updated!", "autoQualityCircles", "E54242")
+function AutoQualityCircles:updateError()
+  self:msg("Auto updater error!", "AutoQualityCircles", "E54242")
 end
 
  -- If someone can teach me, how to make this class function, I will appreciate *)
@@ -85,7 +85,7 @@ function myDrawCircle3D(x, y, z, radius, width, color, quality)
   DrawLines2(points, width or 1, color or 4294967295)
 end
 
-function autoQualityCircles:Tick()
+function AutoQualityCircles:Tick()
   if GetTickCount() > self.gTimeDelay then -- loop (2)
     if self.cfg.adjust:Value() then
       if not self.circleAssigned then
@@ -109,19 +109,19 @@ function autoQualityCircles:Tick()
   end
 end
 
-function autoQualityCircles:calculateDefaultQuality()
+function AutoQualityCircles:calculateDefaultQuality()
   local quality = 1000/(self.cfg.testC.circleQual:Value()*self.cfg.testC.qualMultiTen:Value()*self.cfg.testC.qualMultiHun:Value())
   if not self.cfg.adjust:Value() then self:printLimitedDebugMsg("local gos quality = "..quality) end
   return quality
 end
 
-function autoQualityCircles:calculateInspiredQuality()
+function AutoQualityCircles:calculateInspiredQuality()
   local quality = (self.cfg.testC.circleQual:Value()*self.cfg.testC.qualMultiTen:Value()*self.cfg.testC.qualMultiHun:Value())
   if not self.cfg.adjust:Value() then self:printLimitedDebugMsg("local inspired quality = "..quality) end
   return quality
 end
 
-function autoQualityCircles:Draw()
+function AutoQualityCircles:Draw()
   if self.cfg.testC.drawRange:Value() then
     -- DrawCircle(self.myHeroPos,30,0,0,ARGB(0xff,0,0xff,0)); -- GREEN
     -- DrawCircle(self.myHeroPos,100,0,0,0xffffffff); -- WHITE
@@ -146,11 +146,11 @@ function autoQualityCircles:Draw()
   end
 end
 
-function autoQualityCircles:printDebugMsg(msg)
+function AutoQualityCircles:printDebugMsg(msg)
   if self.cfg.debug:Value() then PrintChat(self:color("debug", "FFB266")..": "..msg) end
 end
 
-function autoQualityCircles:printLimitedDebugMsg(msg)
+function AutoQualityCircles:printLimitedDebugMsg(msg)
   if self.cfg.debug:Value() and GetTickCount() > self.dTimeDelay then
     self.savedMessages[msg] = 1
     for cMsg, _ in pairs(self.savedMessages) do
@@ -163,13 +163,13 @@ function autoQualityCircles:printLimitedDebugMsg(msg)
   end
 end
 
-function autoQualityCircles:color(msg, hexColorCode) -- color text
+function AutoQualityCircles:color(msg, hexColorCode)
   return "<font color=\"#"..hexColorCode.."\">"..msg.."</font>"
 end
 
-function autoQualityCircles:msg(msg, script, color)
+function AutoQualityCircles:msg(msg, script, color)
   color = color or "FFFFFF"
-  PrintChat("<font color=\"#00FFFF\">["..script.."]:</font> "..self:color(msg, color))
+  PrintChat(self:color("["..script.."]: ", "00FFFF")..self:color(msg, color))
 end
 
-_G.AQC_Instance = autoQualityCircles() -- init
+_G.AQC_Instance = AutoQualityCircles() -- init
